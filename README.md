@@ -1,115 +1,156 @@
-# 🧠 Detections Sigma – Windows Rule Collection
+# Detections Sigma
 
-A curated repository of high-quality, vendor-agnostic **Sigma rules** for detecting suspicious and malicious activity in Windows environments. Built to support security operations, threat detection, and hands-on detection engineering.
+A curated collection of vendor-agnostic Sigma rules for SOC monitoring, threat hunting, detection engineering, and security lab work.
 
----
+The repository now covers Windows behavior detections, Linux behavior detections, and CVE-focused rules for high-impact exploitation activity observed in 2025.
 
-## 📂 Folder Structure
+## Repository Layout
 
-```
+```text
 rules/
-└── windows/
-    ├── lsass-access.yml
-    ├── powershell-encoded-command.yml
-    ├── proc-explorer-lsass.yml
-    ├── remote-service-creation.yml
-    ├── wmi-spawning-cmd.yml
-    ├── suspicious-parent-child.yml
-    └── sticky-keys-backdoor.yml
+  _templates/
+    template_rule.yml
+  cve/
+    2025/
+      cve-2025-*.yml
+  linux/
+    linux_*.yml
+  windows/
+    *.yml
+tools/
+  sigma_rule_checker.py
 ```
 
-Each rule is fully annotated, mapped to MITRE ATT&CK, and includes rationale, FP guidance, and references.
+## Current Coverage
 
----
+| Area | Rule Count | Focus |
+|------|------------|-------|
+| Windows | 26 | Credential access, PowerShell, LOLBins, WMI, services, script hosts, macro execution |
+| Linux | 7 | SSH brute force, kernel modules, netcat listeners, shadow access, sudo anomalies, tmp execution, cron shells |
+| CVE 2025 | 16 | Exploitation and post-exploitation indicators for widely abused vulnerabilities |
 
-## 🔍 What's Inside
+Total detection rules: 49.
 
-- ✅ **Ready-to-use Sigma rules** – stored in structured YAML format
-- 🧠 **Mapped to MITRE ATT&CK** – with TTP tags in every rule
-- 🛠️ **Tested in lab conditions** – status marked as `experimental`, `testing`, or `stable`
-- 🔖 **Tagged and referenced** – each rule contains links to MITRE techniques or relevant docs
+## CVE 2025 Coverage
 
----
+| Vulnerability | Coverage | Rule Files |
+|---------------|----------|------------|
+| CVE-2025-0282 Ivanti Connect Secure | Post-exploitation commands and SPAWN malware file indicators | `cve-2025-0282-ivanti-post-exploitation-commands.yml`, `cve-2025-0282-ivanti-spawn-malware-files.yml` |
+| CVE-2025-24813 Apache Tomcat | Suspicious partial PUT upload behavior | `cve-2025-24813-tomcat-partial-put-abuse.yml` |
+| CVE-2025-29927 Next.js | Middleware bypass header abuse | `cve-2025-29927-nextjs-middleware-bypass-header.yml` |
+| CVE-2025-31324 SAP NetWeaver | Metadata uploader access and JSP webshell access | `cve-2025-31324-sap-metadata-uploader-access.yml`, `cve-2025-31324-sap-webshell-access.yml` |
+| CVE-2025-31161 CrushFTP | AWS4-HMAC authentication bypass pattern | `cve-2025-31161-crushftp-aws4-hmac-auth-bypass.yml` |
+| CVE-2025-3248 Langflow | Validate-code unauthenticated RCE attempts | `cve-2025-3248-langflow-validate-code-rce.yml` |
+| CVE-2025-32756 Fortinet FortiVoice | FastCGI crash indicators and malware file IOCs | `cve-2025-32756-fortinet-fortivoice-fcgi-crash-iocs.yml`, `cve-2025-32756-fortinet-fortivoice-malware-file-iocs.yml` |
+| CVE-2025-34028 Commvault | Deploy package traversal and JSP webshell access | `cve-2025-34028-commvault-deploy-webpackage-traversal.yml`, `cve-2025-34028-commvault-jsp-webshell-access.yml` |
+| CVE-2025-4427 / CVE-2025-4428 Ivanti EPMM | Expression language and Java execution primitives | `cve-2025-4427-4428-ivanti-epmm-el-injection-api-request.yml` |
+| CVE-2025-53770 SharePoint ToolShell | ToolPane request pattern and `spinstall0.aspx` access | `cve-2025-53770-sharepoint-toolshell-toolpane-request.yml`, `cve-2025-53770-sharepoint-spinstall0-machinekey-access.yml` |
+| CVE-2025-59718 / CVE-2025-59719 Fortinet | FortiCloud SSO admin login and config download activity | `cve-2025-59718-59719-fortinet-forticloud-sso-admin-config-download.yml` |
 
-## 💼 Use Cases
+## What's Inside
 
-- Threat Detection and Investigation
-- SIEM/XDR Alerting Pipelines
-- Threat Hunting
-- SOC Enablement and Training
-- Red Team Behavior Detection
+- Ready-to-use Sigma rules in YAML format
+- MITRE ATT&CK mappings through `attack.*` tags
+- CVE tags for vulnerability-focused detections
+- False-positive guidance in every rule
+- References to vendor advisories, vulnerability databases, or threat research
+- A reusable rule template under `rules/_templates/`
 
----
+## How To Use
 
-## ⚙️ How to Use
+Clone the repository:
 
-### 1. Clone the repository
 ```bash
-git clone https://github.com/WojciechCiemski/detections-sigma.git
-cd detections-sigma
+git clone https://github.com/WojciechCiemski/Detections-Sigma.git
+cd Detections-Sigma
 ```
 
-### 2. Convert a rule to your SIEM format using [sigmac](https://github.com/SigmaHQ/sigma)
+Browse rules by detection area:
+
 ```bash
-sigmac -t splunk -c config/splunk-windows.yml rules/windows/lsass-access.yml
+ls rules/windows
+ls rules/linux
+ls rules/cve/2025
 ```
 
-You can replace `splunk` with any supported backend: `elastic`, `sentinel`, `wazuh`, etc.
+Convert a rule with your Sigma toolchain. Backend names and command syntax may vary depending on whether you use `sigma-cli`, `sigmac`, or a SIEM-native integration.
 
----
+Example with Sigma CLI:
 
-## 🧪 Rule Status Meaning
+```bash
+sigma convert -t splunk rules/windows/lsass-access.yml
+sigma convert -t splunk rules/cve/2025/cve-2025-53770-sharepoint-toolshell-toolpane-request.yml
+```
 
-| Status       | Description                                         |
-|--------------|-----------------------------------------------------|
-| `experimental` | Draft or new rule not yet validated in test cases   |
-| `testing`     | Works in lab, undergoing evaluation or tuning      |
-| `stable`      | Confirmed effective and production-ready           |
-| `deprecated`  | Obsolete or replaced; not recommended for use      |
+Example with legacy sigmac:
 
----
+```bash
+sigmac -t splunk rules/windows/lsass-access.yml
+```
 
-## 📘 Featured Rules (Windows)
+## Rule Status
 
-| File Name                        | MITRE Technique       | Status        | Description                                      |
-|----------------------------------|------------------------|----------------|--------------------------------------------------|
-| `lsass-access.yml`               | T1003.001              | stable         | Detects LSASS memory access (e.g. Mimikatz)     |
-| `powershell-encoded-command.yml`| T1059.001              | stable         | Detects encoded PowerShell usage                |
-| `proc-explorer-lsass.yml`       | T1003.001              | experimental   | ProcExp accessing LSASS                         |
-| `remote-service-creation.yml`   | T1021.002              | stable         | Detects remote service install (lateral move)   |
-| `wmi-spawning-cmd.yml`          | T1047, T1059           | testing        | WMI launching cmd.exe (fileless malware)        |
-| `suspicious-parent-child.yml`   | T1059.001              | experimental   | Explorer spawning PowerShell                    |
-| `sticky-keys-backdoor.yml`      | T1546.008              | experimental   | `sethc.exe` backdoor at logon                   |
+| Status | Meaning |
+|--------|---------|
+| `experimental` | New or draft detection logic that should be tuned and validated before production use |
+| `testing` | Works in lab or controlled testing, but still needs broader environment validation |
+| `stable` | Confirmed and suitable for production use with normal tuning |
+| `deprecated` | Replaced, obsolete, or no longer recommended |
 
----
+## Rule Quality Expectations
 
-## 🔐 License
+Each rule should include:
 
-This repository is licensed under the **MIT License**.
+- `title`
+- `id`
+- `status`
+- `description`
+- `author`
+- `date`
+- `license`
+- `logsource`
+- `detection` with `condition`
+- `falsepositives`
+- `level`
+- `tags`
+- `references`
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+For CVE-focused rules, include at least one `cve.YEAR.ID` tag and one relevant MITRE ATT&CK technique tag.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+## Tuning Notes
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Sigma rules are intentionally portable, but real environments differ. Before enabling alerts in production:
 
----
+- Map Sigma fields to your SIEM or data model
+- Validate log source availability and field names
+- Test against representative benign and malicious samples
+- Review false-positive notes
+- Adjust severity and filtering to match your environment
 
-## 🤝 Contributing
+## Contributing
 
-Pull requests welcome!  
-Please follow Sigma spec and include:
-- Clean YAML format
-- MITRE tags
-- References and rationale
-- Status: `experimental` / `testing` / `stable`
+Pull requests are welcome.
 
----
+Please follow the existing style and include:
 
-## 📬 Author
-**[Wojciech Ciemski](https://www.linkedin.com/in/wojciech-ciemski)** – [SecurityBezTabu.pl](https://securitybeztabu.pl)  
-SOC engineer · educator · detection engineer
+- Clean YAML formatting
+- A unique UUID in `id`
+- MITRE ATT&CK tags
+- CVE tags where applicable
+- Useful references
+- Practical false-positive guidance
+- Status set to `experimental`, `testing`, `stable`, or `deprecated`
 
----
+Start from:
 
-> Stay tuned – Linux, cloud and network rules coming soon!
+```text
+rules/_templates/template_rule.yml
+```
+
+## License
+
+This repository is licensed under the MIT License. See `LICENSE` for details.
+
+## Author
+
+Created and maintained by [Wojciech Ciemski](https://www.linkedin.com/in/wojciech-ciemski) - [SecurityBezTabu.pl](https://securitybeztabu.pl)
